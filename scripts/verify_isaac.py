@@ -9,7 +9,7 @@ import sys
 import numpy as np
 
 os.environ.setdefault("OMNI_KIT_ACCEPT_EULA", "YES")
-from _sim import launch, run  # noqa: E402
+from _sim import EXT_ROOT, launch, run  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--physics-hz", type=float, default=None)
@@ -75,6 +75,42 @@ check(freeboard > -raft.size[2], f"waves: center never more than one raft height
 check(roll_pitch.max() < 30.0, f"waves: max |roll| {roll_pitch[0]:.1f} deg, |pitch| {roll_pitch[1]:.1f} deg < 30 deg")
 moved = np.abs(frames[1] - frames[0]).max() if len(frames) == 2 else 0.0
 check(moved > 1e-3, f"waves: water mesh points change between frames 0.5 s apart (max |dp| {moved:.3f} m)")
+
+import isaacsim.core.experimental.utils.app as app_utils  # noqa: E402
+import isaacsim.core.experimental.utils.stage as stage_utils  # noqa: E402
+import omni.kit.actions.core  # noqa: E402
+import omni.kit.app  # noqa: E402
+from isaacsim.core.simulation_manager import SimulationManager  # noqa: E402
+from pxr import UsdPhysics  # noqa: E402
+
+manager = omni.kit.app.get_app().get_extension_manager()
+manager.add_path(str(EXT_ROOT.parent))
+manager.set_extension_enabled_immediate("hachix.wave_sim", True)
+ext_id = manager.get_enabled_extension_id("hachix.wave_sim")
+action = omni.kit.actions.core.get_action_registry().get_action(ext_id, "create_ocean_and_raft")
+check(action is not None, f"extension: {ext_id} enabled and menu action registered")
+stage = stage_utils.create_new_stage()
+action.execute()
+raft_prim = stage.GetPrimAtPath(WaveSimConfig().raft_path)
+check(
+    raft_prim.HasAPI(UsdPhysics.RigidBodyAPI) and stage.GetPrimAtPath(WaveSimConfig().water_path).IsValid(),
+    "extension: menu action authored the raft rigid body and water mesh",
+)
+app.update()
+app_utils.play()
+while SimulationManager.get_simulation_time() < 3.0:
+    app.update()
+from isaacsim.core.experimental.prims import RigidPrim  # noqa: E402
+
+from hachix.wave_sim.waves import Wavefield  # noqa: E402
+
+position = RigidPrim(WaveSimConfig().raft_path).get_world_poses()[0].numpy()[0].astype(float)
+local_surface = Wavefield.from_parameters(WaveSimConfig().waves).height(position[None, :2], SimulationManager.get_simulation_time())[0]
+app_utils.stop()
+check(
+    position[2] - local_surface > -raft.size[2],
+    f"extension: raft afloat after 3 s of Play from the menu-built scene (z {position[2]:.3f} m, surface {local_surface:.3f} m)",
+)
 
 print("FAILED: " + "; ".join(failures) if failures else "ALL CHECKS PASSED", flush=True)
 exit_code = 1 if failures else 0

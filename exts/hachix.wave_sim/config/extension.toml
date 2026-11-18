@@ -1,0 +1,19 @@
+[package]
+version = "0.1.0"
+title = "Wave Sim"
+description = "Gerstner ocean waves and hull buoyancy/drag for floating rigid bodies, ported from wave_sim_vrx and asv_wave_sim."
+category = "Simulation"
+keywords = ["ocean", "waves", "buoyancy", "hydrodynamics"]
+authors = ["HACHIX"]
+
+[dependencies]
+"isaacsim.core.experimental.prims" = {}
+"isaacsim.core.simulation_manager" = {}
+"omni.kit.actions.core" = {}
+"omni.kit.menu.utils" = {}
+"omni.physx" = {}
+"omni.usd" = {}
+
+# The package __init__ stays free of omni imports so the numpy core is testable without Kit.
+[[python.module]]
+name = "hachix.wave_sim.extension"
