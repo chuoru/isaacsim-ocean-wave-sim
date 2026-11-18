@@ -13,15 +13,15 @@ The wavefield is ported from [wave_sim_vrx](https://github.com/srmainwaring/wave
 
 The extension is the folder `exts/isaacsim.ocean.wave_sim`. It is self-contained, so you can copy that folder anywhere. Then point Isaac Sim at its parent folder in one of these ways:
 
-- **GUI.** Open **Window > Extensions**, then the hamburger menu, then **Settings**. Add the parent folder (for example `/path/to/robot_on_ship/exts`) to the extension search paths. Search for `isaacsim.ocean.wave_sim` and enable it.
-- **Launch flag.** Run `isaacsim --ext-folder /path/to/robot_on_ship/exts --enable isaacsim.ocean.wave_sim`.
+- **GUI.** Open **Window > Extensions**, then the hamburger menu, then **Settings**. Add the parent folder (for example `/path/to/isaacsim-ocean-wave-sim/exts`) to the extension search paths. Search for `isaacsim.ocean.wave_sim` and enable it.
+- **Launch flag.** Run `isaacsim --ext-folder /path/to/isaacsim-ocean-wave-sim/exts --enable isaacsim.ocean.wave_sim`.
 - **Standalone Python app.** After you create `SimulationApp`, run this code:
 
   ```python
   import omni.kit.app
 
   manager = omni.kit.app.get_app().get_extension_manager()
-  manager.add_path("/path/to/robot_on_ship/exts")
+  manager.add_path("/path/to/isaacsim-ocean-wave-sim/exts")
   manager.set_extension_enabled_immediate("isaacsim.ocean.wave_sim", True)
   ```
 
