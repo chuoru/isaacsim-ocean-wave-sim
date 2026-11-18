@@ -95,8 +95,9 @@ class Wavefield:
         c = components
         self._qa_d = (c.steepness * c.amplitude)[:, None] * c.direction
         self._k_d = c.wavenumber[:, None] * c.direction
-        self._qak = c.steepness * c.amplitude * c.wavenumber
-        self._dd = c.direction[:, :, None] * c.direction[:, None, :]
+        qak = c.steepness * c.amplitude * c.wavenumber
+        dx, dy = c.direction.T
+        self._jacobian_terms = np.stack([qak * dx * dx, qak * dx * dy, qak * dy * dy], axis=1)
 
     @classmethod
     def from_parameters(cls, params: WaveParameters) -> "Wavefield":
@@ -126,8 +127,11 @@ class Wavefield:
             if idx.size == 0:
                 break
             theta = self._theta(x0[idx], t)
-            residual = x0[idx] - np.sin(theta) @ self._qa_d - xy[idx]
-            jac = np.eye(2) - np.einsum("mi,i,ijk->mjk", np.cos(theta), self._qak, self._dd)
-            x0[idx] -= np.linalg.solve(jac, residual[:, :, None])[:, :, 0]
-            active[idx] = np.linalg.norm(residual, axis=1) > NEWTON_TOLERANCE
+            rx, ry = (x0[idx] - np.sin(theta) @ self._qa_d - xy[idx]).T
+            # Symmetric 2x2 Jacobian I - sum q a k cos(theta) d d^T, inverted in closed form.
+            jxx, jxy, jyy = (np.array([1.0, 0.0, 1.0]) - np.cos(theta) @ self._jacobian_terms).T
+            det = jxx * jyy - jxy * jxy
+            x0[idx, 0] -= (jyy * rx - jxy * ry) / det
+            x0[idx, 1] -= (jxx * ry - jxy * rx) / det
+            active[idx] = np.hypot(rx, ry) > NEWTON_TOLERANCE
         return np.cos(self._theta(x0, t)) @ self.components.amplitude
