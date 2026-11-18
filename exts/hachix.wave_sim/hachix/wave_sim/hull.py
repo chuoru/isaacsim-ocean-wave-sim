@@ -18,6 +18,19 @@ class HullMesh:
         return float(np.einsum("ij,ij->i", v[:, 0], np.cross(v[:, 1], v[:, 2])).sum() / 6.0)
 
     @classmethod
+    def from_polygons(cls, points: np.ndarray, face_counts: np.ndarray, face_indices: np.ndarray) -> "HullMesh":
+        """Fan-triangulate USD-style polygons (convex faces assumed), keeping their winding."""
+        counts = np.asarray(face_counts, dtype=np.int64)
+        indices = np.asarray(face_indices, dtype=np.int64)
+        starts = np.concatenate([[0], np.cumsum(counts)[:-1]])
+        fan = [
+            np.stack([np.full(n - 2, indices[s]), indices[s + 1 : s + n - 1], indices[s + 2 : s + n]], axis=1)
+            for s, n in zip(starts, counts)
+            if n >= 3
+        ]
+        return cls(np.asarray(points, dtype=float), np.concatenate(fan))
+
+    @classmethod
     def box(cls, size: tuple[float, float, float], cells_per_meter: float = 8.0) -> "HullMesh":
         """Axis-aligned box centered at the origin, each face split into a grid of triangle pairs."""
         half = np.asarray(size, dtype=float) / 2.0

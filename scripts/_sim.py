@@ -41,17 +41,15 @@ class Trace:
         return np.degrees(np.column_stack([roll, pitch]))
 
 
-def run(app, config, duration: float, on_frame=None) -> Trace:
+def run(app, example, duration: float, on_frame=None) -> Trace:
     """Build the scene on a fresh stage, play for `duration` simulated seconds, sample once per app update."""
     import isaacsim.core.experimental.utils.app as app_utils
     import isaacsim.core.experimental.utils.stage as stage_utils
-    from hachix.wave_sim.scene import WaveSimScene
+    from hachix.wave_sim.examples.raft import build_raft_scene
     from isaacsim.core.simulation_manager import SimulationManager
 
     stage = stage_utils.create_new_stage()
-    scene = WaveSimScene(config)
-    scene.build(stage)
-    scene.attach()
+    ocean, floater = build_raft_scene(stage, example)
     app.update()
     app_utils.play()
 
@@ -60,13 +58,14 @@ def run(app, config, duration: float, on_frame=None) -> Trace:
     while app_utils.is_playing() and SimulationManager.get_simulation_time() < duration:
         app.update()
         t = SimulationManager.get_simulation_time()
-        position, orientation, _, _ = scene.raft_state()
-        surface = scene.wavefield.height(position[None, :2].astype(float), t)[0]
+        position, orientation, _, _ = floater.state()
+        surface = ocean.height(position[None, :2], t)[0]
         samples.append((t, *position, *orientation, surface))
         if on_frame is not None:
-            on_frame(scene, t)
+            on_frame(ocean, floater, t)
     wall = time.perf_counter() - start
     app_utils.stop()
-    scene.detach()
+    floater.detach()
+    ocean.detach()
     data = np.array(samples, dtype=float)
     return Trace(data[:, 0], data[:, 1:4], data[:, 4:8], data[:, 8], wall)

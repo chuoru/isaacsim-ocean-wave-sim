@@ -69,3 +69,17 @@ def test_wave_crest_lifts_more_than_trough():
     crest = wrench_at(0.0, wavefield=field, t=0.0).force[2]
     trough = wrench_at(0.0, wavefield=field, t=period / 2).force[2]
     assert crest > trough
+
+
+def test_quad_mesh_hull_floats_like_the_box_factory():
+    a, b, c = 2.0, 1.5, 0.3
+    corners = np.array([[x, y, z] for x in (-a / 2, a / 2) for y in (-b / 2, b / 2) for z in (-c / 2, c / 2)])
+    quads = [[0, 1, 3, 2], [4, 6, 7, 5], [0, 4, 5, 1], [2, 3, 7, 6], [0, 2, 6, 4], [1, 5, 7, 3]]
+    hull = HullMesh.from_polygons(corners, [4] * 6, np.ravel(quads))
+    assert hull.volume == pytest.approx(a * b * c)
+    mass = 150.0
+    draft = mass / (WATER_DENSITY * a * b)
+    pose = Pose(np.array([0.0, 0.0, c / 2 - draft]), np.array([1.0, 0.0, 0.0, 0.0]))
+    calm = Wavefield.from_parameters(WaveParameters(amplitude=0.0))
+    wrench = compute_wrench(hull, pose, np.zeros(3), np.zeros(3), calm, 0.0, HydroParameters())
+    assert wrench.force[2] == pytest.approx(mass * GRAVITY, rel=1e-9)
