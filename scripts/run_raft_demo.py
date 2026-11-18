@@ -8,7 +8,7 @@ import os
 import numpy as np
 
 os.environ.setdefault("OMNI_KIT_ACCEPT_EULA", "YES")
-from _sim import EXT_ROOT, launch, run  # noqa: E402
+from _sim import launch, run  # noqa: E402
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--headless", action="store_true")
@@ -21,21 +21,13 @@ args = parser.parse_args()
 
 app = launch(headless=args.headless)
 
-import omni.kit.app  # noqa: E402
 import omni.usd  # noqa: E402
-from hachix.wave_sim.examples.raft import RaftExample  # noqa: E402
-from hachix.wave_sim.waves import WaveParameters  # noqa: E402
+from isaacsim.ocean.wave_sim.examples.raft import RaftExample  # noqa: E402
+from isaacsim.ocean.wave_sim.waves import WaveParameters  # noqa: E402
 from pxr import Gf, UsdGeom  # noqa: E402
 
 CAMERA = "/World/DemoCamera"
 captured = []
-
-if not args.headless:
-    manager = omni.kit.app.get_app().get_extension_manager()
-    manager.add_path(str(EXT_ROOT.parent))
-    manager.set_extension_enabled_immediate("hachix.wave_sim", True)
-    print(f"extension enabled: {manager.is_extension_enabled('hachix.wave_sim')}", flush=True)
-
 
 def follow_raft(ocean, floater, t):
     if args.headless:

@@ -1,4 +1,4 @@
-"""Shared launcher for the standalone scripts. Omni imports must follow SimulationApp creation."""
+"""Shared launcher for the standalone scripts. They load the extension the way users do, so its imports must follow `launch`."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ from pathlib import Path
 
 import numpy as np
 
-EXT_ROOT = Path(__file__).resolve().parents[1] / "exts" / "hachix.wave_sim"
-sys.path.insert(0, str(EXT_ROOT))
+EXT_FOLDER = Path(__file__).resolve().parents[1] / "exts"
+EXT_NAME = "isaacsim.ocean.wave_sim"
 
 
 def launch(headless: bool):
@@ -22,6 +22,14 @@ def launch(headless: bool):
     if SimulationManager.get_active_physics_engine() != "physx":
         SimulationManager.switch_physics_engine("physx")
     print(f"physics engine: {SimulationManager.get_active_physics_engine()}", flush=True)
+
+    import omni.kit.app
+
+    manager = omni.kit.app.get_app().get_extension_manager()
+    manager.add_path(str(EXT_FOLDER))
+    manager.set_extension_enabled_immediate(EXT_NAME, True)
+    if not manager.is_extension_enabled(EXT_NAME):
+        sys.exit(f"could not enable {EXT_NAME} from {EXT_FOLDER}")
     return app
 
 
@@ -45,7 +53,7 @@ def run(app, example, duration: float, on_frame=None) -> Trace:
     """Build the scene on a fresh stage, play for `duration` simulated seconds, sample once per app update."""
     import isaacsim.core.experimental.utils.app as app_utils
     import isaacsim.core.experimental.utils.stage as stage_utils
-    from hachix.wave_sim.examples.raft import build_raft_scene
+    from isaacsim.ocean.wave_sim.examples.raft import build_raft_scene
     from isaacsim.core.simulation_manager import SimulationManager
 
     stage = stage_utils.create_new_stage()

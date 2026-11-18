@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from hachix.wave_sim.hull import HullMesh
-from hachix.wave_sim.hydrodynamics import WATER_DENSITY, HydroParameters, Pose, compute_wrench
-from hachix.wave_sim.waves import GRAVITY, Wavefield, WaveParameters
+from wave_sim.hull import HullMesh
+from wave_sim.hydrodynamics import WATER_DENSITY, HydroParameters, Pose, compute_wrench
+from wave_sim.waves import GRAVITY, Wavefield, WaveParameters
 
 SIZE = (2.0, 1.5, 0.3)
 MASS = 150.0

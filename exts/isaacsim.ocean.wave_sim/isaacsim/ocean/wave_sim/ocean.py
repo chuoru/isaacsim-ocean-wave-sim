@@ -78,7 +78,7 @@ class Ocean:
     def build(self, stage: Usd.Stage) -> "Ocean":
         """Author the water mesh at `spec.path`, replacing any previous copy. The stage must be z-up."""
         if UsdGeom.GetStageUpAxis(stage) != UsdGeom.Tokens.z:
-            raise ValueError("hachix.wave_sim needs a z-up stage: call UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)")
+            raise ValueError("isaacsim.ocean.wave_sim needs a z-up stage: call UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)")
         stage.RemovePrim(self.spec.path)
         water = UsdGeom.Mesh.Define(stage, self.spec.path)
         water.CreateFaceVertexCountsAttr(Vt.IntArray.FromNumpy(self._face_counts.astype(np.int32)))
@@ -96,7 +96,7 @@ class Ocean:
         self._update_sub = carb.eventdispatcher.get_eventdispatcher().observe_event(
             event_name=omni.kit.app.GLOBAL_EVENT_UPDATE,
             on_event=lambda _: self._write(SimulationManager.get_simulation_time()),
-            observer_name=f"hachix.wave_sim.ocean:{self.spec.path}",
+            observer_name=f"isaacsim.ocean.wave_sim.ocean:{self.spec.path}",
         )
         return self
 

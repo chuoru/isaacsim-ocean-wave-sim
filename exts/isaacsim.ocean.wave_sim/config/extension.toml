@@ -16,4 +16,4 @@ authors = ["HACHIX"]
 
 # The package __init__ stays free of omni imports so the numpy core is testable without Kit.
 [[python.module]]
-name = "hachix.wave_sim.extension"
+name = "isaacsim.ocean.wave_sim.extension"

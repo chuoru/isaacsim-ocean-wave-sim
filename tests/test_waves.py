@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from hachix.wave_sim.waves import GRAVITY, Wavefield, WaveParameters, wave_components
+from wave_sim.waves import GRAVITY, Wavefield, WaveParameters, wave_components
 
 SEA_STATES = {
     "vrx_defaults_0.5m_6s": WaveParameters.vrx_ocean_waves(amplitude=0.5, period=6.0),

@@ -16,9 +16,9 @@ parser.add_argument("--physics-hz", type=float, default=None)
 args = parser.parse_args()
 app = launch(headless=True)
 
-from hachix.wave_sim.hydrodynamics import WATER_DENSITY  # noqa: E402
-from hachix.wave_sim.examples.raft import RaftExample  # noqa: E402
-from hachix.wave_sim.waves import WaveParameters  # noqa: E402
+from isaacsim.ocean.wave_sim.hydrodynamics import WATER_DENSITY  # noqa: E402
+from isaacsim.ocean.wave_sim.examples.raft import RaftExample  # noqa: E402
+from isaacsim.ocean.wave_sim.waves import WaveParameters  # noqa: E402
 
 failures: list[str] = []
 rate = {} if args.physics_hz is None else {"physics_hz": args.physics_hz}

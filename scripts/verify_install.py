@@ -1,4 +1,4 @@
-"""Proof that hachix.wave_sim works as a standalone Isaac Sim extension outside this repo.
+"""Proof that isaacsim.ocean.wave_sim works as a standalone Isaac Sim extension outside this repo.
 
 Copies the extension folder to a temp directory, loads it only through the extension manager (this
 repo is never put on sys.path), then floats the menu raft example and a user-authored scaled Cube.
@@ -14,9 +14,9 @@ import tempfile
 from pathlib import Path
 
 os.environ.setdefault("OMNI_KIT_ACCEPT_EULA", "YES")
-SOURCE = Path(__file__).resolve().parents[1] / "exts" / "hachix.wave_sim"
+SOURCE = Path(__file__).resolve().parents[1] / "exts" / "isaacsim.ocean.wave_sim"
 install_root = Path(tempfile.mkdtemp(prefix="wave_sim_install_"))
-shutil.copytree(SOURCE, install_root / "hachix.wave_sim", ignore=shutil.ignore_patterns("__pycache__"))
+shutil.copytree(SOURCE, install_root / "isaacsim.ocean.wave_sim", ignore=shutil.ignore_patterns("__pycache__"))
 
 from isaacsim import SimulationApp  # noqa: E402
 
@@ -50,18 +50,18 @@ def play_for(seconds: float) -> None:
 
 manager = omni.kit.app.get_app().get_extension_manager()
 manager.add_path(str(install_root))
-manager.set_extension_enabled_immediate("hachix.wave_sim", True)
-ext_id = manager.get_enabled_extension_id("hachix.wave_sim")
-import hachix.wave_sim  # noqa: E402
+manager.set_extension_enabled_immediate("isaacsim.ocean.wave_sim", True)
+ext_id = manager.get_enabled_extension_id("isaacsim.ocean.wave_sim")
+import isaacsim.ocean.wave_sim  # noqa: E402
 
-loaded_from = Path(hachix.wave_sim.__path__[0]).resolve()
+loaded_from = Path(isaacsim.ocean.wave_sim.__path__[0]).resolve()
 check(bool(ext_id), f"install: enabled {ext_id} from {install_root}")
 check(install_root.resolve() in loaded_from.parents, f"install: package imported from the copy ({loaded_from})")
 
-from hachix.wave_sim.examples.raft import RaftSpec  # noqa: E402
-from hachix.wave_sim.hydrodynamics import WATER_DENSITY  # noqa: E402
-from hachix.wave_sim.ocean import Floater, Ocean, OceanSpec  # noqa: E402
-from hachix.wave_sim.waves import WaveParameters  # noqa: E402
+from isaacsim.ocean.wave_sim.examples.raft import RaftSpec  # noqa: E402
+from isaacsim.ocean.wave_sim.hydrodynamics import WATER_DENSITY  # noqa: E402
+from isaacsim.ocean.wave_sim.ocean import Floater, Ocean, OceanSpec  # noqa: E402
+from isaacsim.ocean.wave_sim.waves import WaveParameters  # noqa: E402
 
 action = omni.kit.actions.core.get_action_registry().get_action(ext_id, "create_ocean_and_raft")
 check(action is not None, "example: Wave Sim > Examples > Ocean + Raft action registered")

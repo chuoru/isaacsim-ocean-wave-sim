@@ -8,10 +8,10 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "exts" / "hachix.wave_sim"))
-from hachix.wave_sim.hull import HullMesh  # noqa: E402
-from hachix.wave_sim.hydrodynamics import HydroParameters, Pose, compute_wrench, submerged_triangles  # noqa: E402
-from hachix.wave_sim.waves import Wavefield, WaveParameters  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "exts" / "isaacsim.ocean.wave_sim" / "isaacsim" / "ocean"))
+from wave_sim.hull import HullMesh  # noqa: E402
+from wave_sim.hydrodynamics import HydroParameters, Pose, compute_wrench, submerged_triangles  # noqa: E402
+from wave_sim.waves import Wavefield, WaveParameters  # noqa: E402
 
 REPEATS = 5
 CALLS = 2000

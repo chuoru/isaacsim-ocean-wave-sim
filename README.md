@@ -1,6 +1,6 @@
-# hachix.wave_sim: ocean waves and buoyancy for Isaac Sim
+# isaacsim.ocean.wave_sim: ocean waves and buoyancy for Isaac Sim
 
-Isaac Sim has no water or buoyancy. `hachix.wave_sim` is an Isaac Sim extension that adds both: a Gerstner wavefield that animates a water mesh, and hull hydrodynamics that float any rigid body on it. The extension ships with one example: a 2.0 x 1.5 x 0.3 m, 150 kg raft.
+Isaac Sim has no water or buoyancy. `isaacsim.ocean.wave_sim` is an Isaac Sim extension that adds both: a Gerstner wavefield that animates a water mesh, and hull hydrodynamics that float any rigid body on it. The extension ships with one example: a 2.0 x 1.5 x 0.3 m, 150 kg raft.
 
 The wavefield is ported from [wave_sim_vrx](https://github.com/srmainwaring/wave_sim_vrx) and the hydrodynamics follow [asv_wave_sim](https://github.com/srmainwaring/asv_wave_sim). See [Attribution](#attribution) before you redistribute it.
 
@@ -11,10 +11,10 @@ The wavefield is ported from [wave_sim_vrx](https://github.com/srmainwaring/wave
 
 ## Install
 
-The extension is the folder `exts/hachix.wave_sim`. It is self-contained, so you can copy that folder anywhere. Then point Isaac Sim at its parent folder in one of these ways:
+The extension is the folder `exts/isaacsim.ocean.wave_sim`. It is self-contained, so you can copy that folder anywhere. Then point Isaac Sim at its parent folder in one of these ways:
 
-- **GUI.** Open **Window > Extensions**, then the hamburger menu, then **Settings**. Add the parent folder (for example `/path/to/robot_on_ship/exts`) to the extension search paths. Search for `hachix.wave_sim` and enable it.
-- **Launch flag.** Run `isaacsim --ext-folder /path/to/robot_on_ship/exts --enable hachix.wave_sim`.
+- **GUI.** Open **Window > Extensions**, then the hamburger menu, then **Settings**. Add the parent folder (for example `/path/to/robot_on_ship/exts`) to the extension search paths. Search for `isaacsim.ocean.wave_sim` and enable it.
+- **Launch flag.** Run `isaacsim --ext-folder /path/to/robot_on_ship/exts --enable isaacsim.ocean.wave_sim`.
 - **Standalone Python app.** After you create `SimulationApp`, run this code:
 
   ```python
@@ -22,16 +22,18 @@ The extension is the folder `exts/hachix.wave_sim`. It is self-contained, so you
 
   manager = omni.kit.app.get_app().get_extension_manager()
   manager.add_path("/path/to/robot_on_ship/exts")
-  manager.set_extension_enabled_immediate("hachix.wave_sim", True)
+  manager.set_extension_enabled_immediate("isaacsim.ocean.wave_sim", True)
   ```
 
-Once the extension is enabled, `import hachix.wave_sim...` works from any script, the Script Editor, or another extension. To use it from your own extension, add `"hachix.wave_sim" = {}` to that extension's `[dependencies]`.
+Once the extension is enabled, `import isaacsim.ocean.wave_sim...` works from any script, the Script Editor, or another extension. To use it from your own extension, add `"isaacsim.ocean.wave_sim" = {}` to that extension's `[dependencies]`.
+
+The name follows Isaac Sim's own `isaacsim.<area>.<feature>` convention, as in `isaacsim.robot.surface_gripper`. Like NVIDIA's extensions, the folder has no `isaacsim/__init__.py` or `isaacsim/ocean/__init__.py`, and Kit adds `isaacsim/ocean/wave_sim` to the `isaacsim` package when the extension is enabled. So the import works only after the extension is enabled, not from a plain `sys.path` entry. `isaacsim.` is NVIDIA's namespace. If NVIDIA ever ships an extension called `isaacsim.ocean.wave_sim`, the two will clash.
 
 `scripts/verify_install.py` proves the install path. It copies the extension folder to a temp directory and loads it only through the extension manager. It then runs the raft example from the menu action and floats a scaled `Cube` the script authors itself. It exits nonzero if any check fails.
 
 ## Float your own body
 
-The plugin has two parts, both in `hachix.wave_sim.ocean`:
+The plugin has two parts, both in `isaacsim.ocean.wave_sim.ocean`:
 
 - `Ocean(OceanSpec(...))` authors the water mesh and animates it on every app update. `ocean.height(xy, t)` gives the surface z at any world xy.
 - `Floater(ocean, body_path, hull=None, hydro=None)` applies buoyancy, pressure drag and damping to an existing rigid body on every physics step.
@@ -40,8 +42,8 @@ The plugin does not create a physics scene or lights, and it does not change sta
 
 ```python
 import omni.usd
-from hachix.wave_sim.ocean import Floater, Ocean, OceanSpec
-from hachix.wave_sim.waves import WaveParameters
+from isaacsim.ocean.wave_sim.ocean import Floater, Ocean, OceanSpec
+from isaacsim.ocean.wave_sim.waves import WaveParameters
 
 stage = omni.usd.get_context().get_stage()
 ocean = Ocean(OceanSpec(waves=WaveParameters.vrx_ocean_waves(amplitude=0.5, period=6.0))).build(stage).attach()
@@ -55,7 +57,7 @@ Each `Floater` costs about 1.4 ms per physics step for the 1104-triangle raft hu
 
 ## The raft example
 
-`hachix/wave_sim/examples/raft.py` is the full recipe. It sets up a z-up stage with a physics scene and lights, an `Ocean`, a raft rigid body whose visual, collider and hull are one mesh, a `Floater`, and a 60 Hz physics rate. You can run it three ways:
+`isaacsim/ocean/wave_sim/examples/raft.py` is the full recipe. It sets up a z-up stage with a physics scene and lights, an `Ocean`, a raft rigid body whose visual, collider and hull are one mesh, a `Floater`, and a 60 Hz physics rate. You can run it three ways:
 
 - In the GUI, click **Wave Sim > Examples > Ocean + Raft** and press **Play**. The scene is authored under `/World/WaveSim`, and a second click replaces it.
 - From Python, call `build_raft_scene(stage, RaftExample(...))`.
@@ -80,8 +82,8 @@ The numpy core has a pytest suite that needs no Isaac. Run it with `python -m py
 
 ## Layout
 
-- `exts/hachix.wave_sim/config/extension.toml` is the extension manifest.
-- `hachix/wave_sim/waves.py` holds `WaveParameters`, `wave_components`, and `Wavefield.displace` / `Wavefield.height`. It is pure numpy.
+- `exts/isaacsim.ocean.wave_sim/config/extension.toml` is the extension manifest.
+- `isaacsim/ocean/wave_sim/waves.py` holds `WaveParameters`, `wave_components`, and `Wavefield.displace` / `Wavefield.height`. It is pure numpy.
 - `hull.py` holds `HullMesh`, with the `box` and `from_polygons` factories. It is pure numpy.
 - `hydrodynamics.py` holds `HydroParameters` and `compute_wrench`. It is pure numpy.
 - `ocean.py` holds `Ocean`, `Floater`, and `hull_from_prim`. It is the only plugin module that imports `omni` or `pxr`.
